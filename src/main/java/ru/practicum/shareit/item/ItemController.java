@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,9 +48,6 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> findItemsByNameOrDescription(@RequestParam(value = "text", required = false) String text) {
-        if (text != null && !text.isBlank()) {
-            return itemService.findItemsByNameOrDescription(text);
-        }
-        return new ArrayList<>();
+        return itemService.findItemsByNameOrDescription(text);
     }
 }

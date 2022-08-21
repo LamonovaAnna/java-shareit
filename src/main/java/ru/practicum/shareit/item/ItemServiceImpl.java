@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,13 +78,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findItemsByNameOrDescription(String text) {
-        String textForSearch = text.toLowerCase();
-        return ItemMapper.toItemsDto(itemStorage.getAllItems())
-                .stream()
-                .filter(i -> i.getName().toLowerCase().contains(textForSearch)
-                        || i.getDescription().toLowerCase().contains(textForSearch))
-                .filter(ItemDto::getIsAvailable)
-                .collect(Collectors.toList());
+        if (text != null && !text.isBlank()) {
+            String textForSearch = text.toLowerCase();
+            return ItemMapper.toItemsDto(itemStorage.getAllItems())
+                    .stream()
+                    .filter(i -> i.getName().toLowerCase().contains(textForSearch)
+                            || i.getDescription().toLowerCase().contains(textForSearch))
+                    .filter(ItemDto::getIsAvailable)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
 
