@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, IncorrectUserIdException.class})
+    @ExceptionHandler({UserNotFoundException.class,
+            ItemNotFoundException.class,
+            IncorrectUserIdException.class,
+            BookingNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());
@@ -20,7 +23,7 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({ValidationException.class})
+    @ExceptionHandler({ValidationException.class, ItemNotAvailableException.class, IncorrectStatusException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());

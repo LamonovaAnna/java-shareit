@@ -1,32 +1,32 @@
 package ru.practicum.shareit.user.dto;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
 
     public static User toUser(UserDto userDto) {
         if (userDto == null) {
             return null;
         }
-        return User.builder()
-                .id(userDto.getId())
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+        User user = new User();
+        user.setId(userDto.getId() != null ? userDto.getId() : null);
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 
     public static UserDto toUserDto(User user) {
         if (user == null) {
             return null;
         }
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        return new UserDto(user.getId(), user.getName(), user.getEmail());
     }
 
     public static User toUpdateUser(User user, User updateUser) {
