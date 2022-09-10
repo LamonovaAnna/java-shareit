@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -10,9 +11,10 @@ import ru.practicum.shareit.exception.IncorrectUserIdException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemBookingDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.Repository.CommentRepository;
+import ru.practicum.shareit.item.Repository.ItemRepository;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) {
@@ -118,6 +121,30 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+
+    @Override
+    public CommentDto createCommentToItem(long authorId, CommentDto commentDto, long itemId) {
+        userService.findUserById(authorId);
+        if(commentDto.getText().isBlank() || commentDto.getText().isEmpty()) {
+            throw new ValidationException("Comment can't be empty");
+        }
+
+        if (itemRepository.existsById(itemId)) {
+            List<Booking> bookings = bookingRepository.findAllByItemId(itemId);
+            if (!bookings.isEmpty()) {
+                for (Booking booking : bookings) {
+                    if (booking.getBooker().getId() == authorId &&
+                            booking.getEndBooking().isBefore(LocalDateTime.now())) {
+                        return CommentMapper.toCommentDto(commentRepository.save(
+                                CommentMapper.toComment(commentDto, authorId, itemId)));
+                    }
+                }
+            }
+            throw new ValidationException("User has not reserved this item");
+        }
+        throw new IncorrectUserIdException();
     }
 
     private boolean isItemValid(ItemDto item) {

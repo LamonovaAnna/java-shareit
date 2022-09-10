@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,8 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getIsAvailable(),
                 null,
-                null);
+                null,
+                new HashSet<>());
     }
 
     public static Item toUpdateItem(Item item, Item updateItem) {

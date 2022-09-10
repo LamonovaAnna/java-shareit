@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class ItemBookingDto {
     private Boolean isAvailable;
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
+    private Set<CommentDto> comments;
 }

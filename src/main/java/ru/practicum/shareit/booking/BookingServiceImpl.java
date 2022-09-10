@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.Repository.ItemRepository;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
