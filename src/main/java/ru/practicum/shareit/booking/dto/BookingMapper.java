@@ -49,7 +49,7 @@ public class BookingMapper {
                 booking.getStartBooking(),
                 booking.getEndBooking(),
                 new ItemShortDto(booking.getItem().getId(), booking.getItem().getName()),
-                new UserShortDto(booking.getBooker().getId()),
+                new UserShortDto(booking.getBooker().getId(), booking.getBooker().getName()),
                 booking.getStatus());
     }
 

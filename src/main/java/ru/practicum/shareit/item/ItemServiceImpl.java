@@ -3,7 +3,6 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -18,10 +17,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,6 +92,10 @@ public class ItemServiceImpl implements ItemService {
                 }
             }
         }
+        Set<Comment> comments = commentRepository.findCommentsByItem_Id(itemId);
+        if (!comments.isEmpty()) {
+            item.setComments(CommentMapper.toCommentsDto(comments));
+        }
         return item;
     }
 
@@ -137,8 +137,11 @@ public class ItemServiceImpl implements ItemService {
                 for (Booking booking : bookings) {
                     if (booking.getBooker().getId() == authorId &&
                             booking.getEndBooking().isBefore(LocalDateTime.now())) {
-                        return CommentMapper.toCommentDto(commentRepository.save(
+                        CommentDto comment = CommentMapper.toCommentDto(commentRepository.save(
                                 CommentMapper.toComment(commentDto, authorId, itemId)));
+                        comment.setItem(ItemMapper.toItemShortDto(itemRepository.getReferenceById(itemId)));
+                        comment.setAuthorName(userService.findUserById(authorId).getName());
+                        return comment;
                     }
                 }
             }

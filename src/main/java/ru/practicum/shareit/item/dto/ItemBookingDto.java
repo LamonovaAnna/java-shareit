@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 
 import java.util.Set;
@@ -22,5 +21,5 @@ public class ItemBookingDto {
     private Boolean isAvailable;
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
-    private Set<CommentDto> comments;
+    private Set<CommentShortDto> comments;
 }

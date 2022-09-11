@@ -48,6 +48,14 @@ public class ItemMapper {
                 new HashSet<>());
     }
 
+    public static ItemShortDto toItemShortDto(Item item) {
+        if (item == null) {
+            return null;
+        }
+        return new ItemShortDto(item.getId(),
+                item.getName());
+    }
+
     public static Item toUpdateItem(Item item, Item updateItem) {
         item.setName(updateItem.getName() == null ? item.getName() : updateItem.getName());
         item.setDescription(updateItem.getDescription() == null ? item.getDescription() : updateItem.getDescription());

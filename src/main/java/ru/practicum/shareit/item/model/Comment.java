@@ -28,8 +28,9 @@ public class Comment {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @Column(name = "author_id")
-    private User authorId;
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
     private LocalDateTime created;
 }
