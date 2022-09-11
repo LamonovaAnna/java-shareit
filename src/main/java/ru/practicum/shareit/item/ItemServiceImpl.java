@@ -56,8 +56,8 @@ public class ItemServiceImpl implements ItemService {
         for (ItemBookingDto item : items) {
             List<Booking> lastBookings = bookingRepository
                     .findBookingByItemIdAndEndBookingIsBeforeOrderByEndBookingDesc(item.getId(), LocalDateTime.now());
-            List<Booking> nextBookings = bookingRepository.
-                    findBookingByItemIdAndStartBookingIsAfterOrderByStartBookingAsc(item.getId(), LocalDateTime.now());
+            List<Booking> nextBookings = bookingRepository
+                    .findBookingByItemIdAndStartBookingIsAfterOrderByStartBookingAsc(item.getId(), LocalDateTime.now());
             if (!lastBookings.isEmpty()) {
                 item.setLastBooking(BookingMapper.toBookingForItemDto(lastBookings.get(0)));
             }
@@ -82,8 +82,8 @@ public class ItemServiceImpl implements ItemService {
             if (Objects.equals(item.getOwnerId(), userId)) {
                 List<Booking> lastBookings = bookingRepository
                         .findBookingByItemIdAndEndBookingIsBeforeOrderByEndBookingDesc(itemId, LocalDateTime.now());
-                List<Booking> nextBookings = bookingRepository.
-                        findBookingByItemIdAndStartBookingIsAfterOrderByStartBookingAsc(itemId, LocalDateTime.now());
+                List<Booking> nextBookings = bookingRepository
+                        .findBookingByItemIdAndStartBookingIsAfterOrderByStartBookingAsc(itemId, LocalDateTime.now());
                 if (!lastBookings.isEmpty()) {
                     item.setLastBooking(BookingMapper.toBookingForItemDto(lastBookings.get(0)));
                 }
@@ -127,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto createCommentToItem(long authorId, CommentDto commentDto, long itemId) {
         userService.findUserById(authorId);
-        if(commentDto.getText().isBlank() || commentDto.getText().isEmpty()) {
+        if (commentDto.getText().isBlank() || commentDto.getText().isEmpty()) {
             throw new ValidationException("Comment can't be empty");
         }
 

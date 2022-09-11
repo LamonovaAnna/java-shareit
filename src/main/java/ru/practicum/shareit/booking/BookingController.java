@@ -39,9 +39,10 @@ public class BookingController {
                 .sorted(Comparator.comparing(BookingDto::getStart).reversed())
                 .collect(Collectors.toList());
     }
+
     @GetMapping("/owner")
     public List<BookingDto> findBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                 @RequestParam(defaultValue = "ALL", required = false) String state) {
+                                                @RequestParam(defaultValue = "ALL", required = false) String state) {
         return bookingService.findBookingsByOwner(ownerId, state)
                 .stream()
                 .sorted(Comparator.comparing(BookingDto::getStart).reversed())
