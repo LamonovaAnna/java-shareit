@@ -10,8 +10,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerId(long bookerId);
 
-    List<Booking> findAllByBookerIdAndStartBookingIsBeforeAndEndBookingIsAfter(
-            long bookerId, LocalDateTime startTime, LocalDateTime endTime);
+    @Query("SELECT b " +
+            "FROM Booking AS b " +
+            "WHERE b.booker.id = ?1 " +
+            "AND b.startBooking < CURRENT_TIMESTAMP " +
+            "AND b.endBooking > CURRENT_TIMESTAMP ")
+    List<Booking> findAllCurrentBookingsByBookerId(long bookerId);
 
     List<Booking> findAllByBookerIdAndEndBookingIsBefore(long bookerId, LocalDateTime time);
 
@@ -49,9 +53,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "WHERE b.item.ownerId = ?1")
     List<Booking> findAllBookingsByOwner(long ownerId);
 
-    List<Booking> findBookingByItemIdAndEndBookingIsBeforeOrderByEndBookingDesc(long itemId, LocalDateTime time);
+    @Query("SELECT b " +
+            "FROM Booking AS b " +
+            "WHERE b.item.id = ?1 " +
+            "AND b.endBooking < CURRENT_TIMESTAMP " +
+            "ORDER BY b.endBooking DESC")
+    List<Booking> findPastBookingsByItemId(long itemId);
 
-    List<Booking> findBookingByItemIdAndStartBookingIsAfterOrderByStartBookingAsc(long itemId, LocalDateTime time);
+    @Query("SELECT b " +
+            "FROM Booking AS b " +
+            "WHERE b.item.id = ?1 " +
+            "AND b.startBooking > CURRENT_TIMESTAMP " +
+            "ORDER BY b.endBooking ASC")
+    List<Booking> findFutureBookingsByItemId(long itemId);
 
     List<Booking> findAllByItemId(long itemId);
 }

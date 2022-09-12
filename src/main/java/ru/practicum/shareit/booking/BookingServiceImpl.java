@@ -65,8 +65,7 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case "CURRENT":
                 return BookingMapper.toBookingsDto(
-                        bookingRepository.findAllByBookerIdAndStartBookingIsBeforeAndEndBookingIsAfter(
-                                bookerId, LocalDateTime.now(), LocalDateTime.now()));
+                        bookingRepository.findAllCurrentBookingsByBookerId(bookerId));
             case "PAST":
                 return BookingMapper.toBookingsDto(
                         bookingRepository.findAllByBookerIdAndEndBookingIsBefore(bookerId, LocalDateTime.now()));
