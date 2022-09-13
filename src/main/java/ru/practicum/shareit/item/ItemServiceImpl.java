@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.exception.IncorrectUserIdException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.Repository.CommentRepository;
 import ru.practicum.shareit.item.Repository.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
@@ -126,24 +123,28 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText().isBlank() || commentDto.getText().isEmpty()) {
             throw new ValidationException("Comment can't be empty");
         }
+        if (!itemRepository.existsById(itemId)) {
+            throw new IncorrectUserIdException();
+        }
 
-        if (itemRepository.existsById(itemId)) {
-            List<Booking> bookings = bookingRepository.findAllByItemId(itemId);
-            if (!bookings.isEmpty()) {
-                for (Booking booking : bookings) {
-                    if (booking.getBooker().getId() == authorId &&
-                            booking.getEndBooking().isBefore(LocalDateTime.now())) {
-                        CommentDto comment = CommentMapper.toCommentDto(commentRepository.save(
-                                CommentMapper.toComment(commentDto, authorId, itemId)));
-                        comment.setItem(ItemMapper.toItemShortDto(itemRepository.getReferenceById(itemId)));
-                        comment.setAuthorName(userService.findUserById(authorId).getName());
-                        return comment;
-                    }
-                }
+        List<Booking> bookings = bookingRepository.findAllByItemId(itemId);
+        if (bookings.isEmpty()) {
+            throw new BookingNotFoundException();
+        }
+
+        CommentDto comment = null;
+        for (Booking booking : bookings) {
+            if (booking.getBooker().getId() == authorId && booking.getEndBooking().isBefore(LocalDateTime.now())) {
+                comment = CommentMapper.toCommentDto(commentRepository.save(
+                        CommentMapper.toComment(commentDto, authorId, itemId)));
+                comment.setItem(ItemMapper.toItemShortDto(itemRepository.getReferenceById(itemId)));
+                comment.setAuthorName(userService.findUserById(authorId).getName());
             }
+        }
+        if (comment == null) {
             throw new ValidationException("User has not reserved this item");
         }
-        throw new IncorrectUserIdException();
+        return comment;
     }
 
     private boolean isItemValid(ItemDto item) {
