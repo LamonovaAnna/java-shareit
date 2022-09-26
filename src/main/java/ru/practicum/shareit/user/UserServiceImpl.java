@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.EmailAlreadyExistException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -19,17 +18,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        if (validateEmail(userDto.getEmail())) {
-            return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
-        }
-        log.info("Incorrect email");
-        throw new EmailAlreadyExistException(userDto.getEmail());
+        validateUser(userDto);
+        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
+
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
         return UserMapper.toUserDto(userRepository.save(UserMapper.toUpdateUser(
-                userRepository.getReferenceById(userId), UserMapper.toUser(userDto))));
+                userRepository.findById(userId).orElseThrow(UserNotFoundException::new), UserMapper.toUser(userDto))));
 
     }
 
@@ -40,10 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findUserById(long id) {
-        if (userRepository.existsById(id)) {
-            return UserMapper.toUserDto(userRepository.getReferenceById(id));
-        }
-        throw new UserNotFoundException();
+        return UserMapper.toUserDto(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
     }
 
     @Override
@@ -51,10 +45,12 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    private boolean validateEmail(String email) {
-        if (email == null || email.isBlank() || !email.contains("@")) {
+    private void validateUser(UserDto user) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Incorrect email");
         }
-        return true;
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new ValidationException("Incorrect name");
+        }
     }
 }
