@@ -33,14 +33,14 @@ public class UserServiceImplIntTest {
         UserDto updatedUser = userService.updateUser(user, savedUser.getId());
 
         assertNotNull(updatedUser, "User wasn't updated");
-        assertEquals(updatedUser.getId(), savedUser.getId(), "Incorrect Id");
+        assertEquals(savedUser.getId(), updatedUser.getId(), "Incorrect Id");
         if (user.getName() != null) {
-            assertEquals(updatedUser.getName(), user.getName(), "Incorrect name");
-            assertEquals(updatedUser.getEmail(), savedUser.getEmail(), "Incorrect email");
+            assertEquals(user.getName(), updatedUser.getName(), "Incorrect name");
+            assertEquals(savedUser.getEmail(), updatedUser.getEmail(), "Incorrect email");
         }
         if (user.getEmail() != null) {
-            assertEquals(updatedUser.getName(), saveUser.getName(), "Incorrect name");
-            assertEquals(updatedUser.getEmail(), user.getEmail(), "Incorrect email");
+            assertEquals(saveUser.getName(), updatedUser.getName(), "Incorrect name");
+            assertEquals(user.getEmail(), updatedUser.getEmail(), "Incorrect email");
         }
     }
 
@@ -74,9 +74,9 @@ public class UserServiceImplIntTest {
 
         UserDto foundUser = userService.findUserById(savedUser.getId());
 
-        assertEquals(foundUser.getId(), savedUser.getId(), "Incorrect Id");
-        assertEquals(foundUser.getName(), saveUser.getName(), "Incorrect name");
-        assertEquals(foundUser.getEmail(), saveUser.getEmail(), "Incorrect email");
+        assertEquals(savedUser.getId(), foundUser.getId(), "Incorrect Id");
+        assertEquals(saveUser.getName(), foundUser.getName(), "Incorrect name");
+        assertEquals(saveUser.getEmail(), foundUser.getEmail(), "Incorrect email");
     }
 
     @Test

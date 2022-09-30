@@ -12,8 +12,8 @@ import ru.practicum.shareit.exception.BookingNotFoundException;
 import ru.practicum.shareit.exception.IncorrectUserIdException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.Repository.CommentRepository;
-import ru.practicum.shareit.item.Repository.ItemRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
@@ -43,93 +43,92 @@ public class ItemServiceImplIntTest {
 
     @Test
     void test1_getAllItemsByOwner() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().plusDays(1),
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2)));
 
-
-        List<ItemBookingDto> items = itemService.getAllItemsByOwner(user1.getId(), 0, 10);
+        List<ItemBookingDto> items = itemService.getAllItemsByOwner(owner.getId(), 0, 10);
 
         assertNotNull(items);
-        assertEquals(items.size(), 1, "Incorrect list size");
+        assertEquals(1, items.size(), "Incorrect list size");
         assertNotNull(items.get(0).getLastBooking(), "Incorrect last booking");
         assertNotNull(items.get(0).getNextBooking(), "Incorrect next booking");
     }
 
     @Test
     void test2_findItemById() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().plusDays(1),
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2)));
-        Comment comment = commentRepository.save(makeComment(null, user2, item, "Really great"));
+        Comment comment = commentRepository.save(makeComment(null, booker, item, "Really great"));
 
-        ItemBookingDto returnedItem = itemService.findItemById(item.getId(), user1.getId());
+        ItemBookingDto returnedItem = itemService.findItemById(item.getId(), owner.getId());
 
         assertNotNull(returnedItem);
-        assertEquals(returnedItem.getId(), item.getId(), "Incorrect Id");
-        assertEquals(returnedItem.getName(), "Bicycle", "Incorrect name");
+        assertEquals(item.getId(), returnedItem.getId(), "Incorrect Id");
+        assertEquals("Bicycle", returnedItem.getName(), "Incorrect name");
         assertNotNull(returnedItem.getLastBooking());
         assertNotNull(returnedItem.getComments());
-        assertEquals(returnedItem.getComments().stream().findFirst().get().getId(), comment.getId(),
+        assertEquals(comment.getId(), returnedItem.getComments().stream().findFirst().get().getId(),
                 "Incorrect comment id");
     }
 
     @Test
     void test3_findItemByIdUserIsNotOwner() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().plusDays(1),
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2)));
-        commentRepository.save(makeComment(null, user2, item, "Really great"));
+        commentRepository.save(makeComment(null, booker, item, "Really great"));
 
-        ItemBookingDto returnedItem = itemService.findItemById(item.getId(), user2.getId());
+        ItemBookingDto returnedItem = itemService.findItemById(item.getId(), booker.getId());
 
         assertNotNull(returnedItem);
-        assertEquals(returnedItem.getId(), item.getId(), "Incorrect Id");
-        assertEquals(returnedItem.getName(), "Bicycle", "Incorrect name");
+        assertEquals(item.getId(), returnedItem.getId(), "Incorrect Id");
+        assertEquals("Bicycle", returnedItem.getName(), "Incorrect name");
         assertNull(returnedItem.getLastBooking());
         assertNotNull(returnedItem.getComments());
-        assertEquals(returnedItem.getComments().stream().findFirst().get().getId(), 1L,
+        assertEquals(1L, returnedItem.getComments().stream().findFirst().get().getId(),
                 "Incorrect comment id");
     }
 
     @Test
     void test3_deleteItem() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
+                owner.getId(), true, null));
 
-        itemService.deleteItem(item.getId(), user1.getId());
+        itemService.deleteItem(item.getId(), owner.getId());
 
         assertFalse(itemRepository.existsById(item.getId()), "Item wasn't deleted");
     }
 
     @Test
     void test4_deleteItemWithIncorrectOwnerId() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
+                owner.getId(), true, null));
 
         final IncorrectUserIdException exception = assertThrows(IncorrectUserIdException.class,
-                () -> itemService.deleteItem(item.getId(), user2.getId()));
+                () -> itemService.deleteItem(item.getId(), booker.getId()));
         assertEquals("Access error", exception.getMessage(),
                 "incorrect message");
-        assertThrows(IncorrectUserIdException.class, () -> itemService.deleteItem(item.getId(), user2.getId()),
+        assertThrows(IncorrectUserIdException.class, () -> itemService.deleteItem(item.getId(), booker.getId()),
                 "Incorrect exception");
 
         assertTrue(itemRepository.existsById(item.getId()), "Item was deleted");
@@ -137,113 +136,114 @@ public class ItemServiceImplIntTest {
 
     @Test
     void test5_findItemsByNameOrDescription() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
+                owner.getId(), true, null));
         itemRepository.save(makeItem(null, "Book", "Very interesting book",
-                user1.getId(), true, null));
+                owner.getId(), true, null));
 
         List<ItemDto> foundBicycle = itemService.findItemsByNameOrDescription("bicy", 0, 10);
 
         assertNotNull(foundBicycle);
-        assertEquals(foundBicycle.size(), 1, "Incorrect list size");
-        assertEquals(foundBicycle.get(0).getName(), "Bicycle", "Was found incorrect item");
+        assertEquals(1, foundBicycle.size(), "Incorrect list size");
+        assertEquals("Bicycle", foundBicycle.get(0).getName(), "Was found incorrect item");
 
         List<ItemDto> foundBook = itemService.findItemsByNameOrDescription("inter", 0, 10);
         assertNotNull(foundBook);
-        assertEquals(foundBook.size(), 1, "Incorrect list size");
-        assertEquals(foundBook.get(0).getName(), "Book", "Was found incorrect item");
+        assertEquals(1, foundBook.size(), "Incorrect list size");
+        assertEquals("Book", foundBook.get(0).getName(), "Was found incorrect item");
 
         List<ItemDto> foundNothing = itemService.findItemsByNameOrDescription("driv", 0, 10);
-        assertEquals(foundNothing.size(), 0, "Incorrect list size");
+        assertEquals(0, foundNothing.size(), "Incorrect list size");
     }
 
     @Test
     void test6_createCommentToItem() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
 
-        CommentDto comment = itemService.createCommentToItem(user2.getId(),
-                CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+        CommentDto comment = itemService.createCommentToItem(booker.getId(),
+                CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                 item.getId());
 
         assertNotNull(comment);
-        assertEquals(comment.getText(), "Really great", "Incorrect text");
+        assertEquals("Really great", comment.getText(), "Incorrect text");
+        assertNotNull(comment.getItem(), "Item is missing");
     }
 
     @Test
     void test7_createCommentToItemWithIncorrectAuthor() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
 
         final UserNotFoundException exception = assertThrows(UserNotFoundException.class,
                 () -> itemService.createCommentToItem(3L,
-                        CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+                        CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                         item.getId()));
         assertEquals("This user doesn't exist", exception.getMessage(),
                 "incorrect message");
         assertThrows(UserNotFoundException.class, () -> itemService.createCommentToItem(3L,
-                CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+                CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                 item.getId()), "Incorrect exception");
     }
 
     @Test
     void test8_createCommentToItemWithIncorrectCommentText() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
 
         final ValidationException exception = assertThrows(ValidationException.class,
-                () -> itemService.createCommentToItem(user2.getId(),
-                        CommentMapper.toCommentDto(makeComment(null, user2, item, "")),
+                () -> itemService.createCommentToItem(booker.getId(),
+                        CommentMapper.toCommentDto(makeComment(null, booker, item, "")),
                         item.getId()));
         assertEquals("Comment can't be empty", exception.getMessage(),
                 "incorrect message");
-        assertThrows(ValidationException.class, () -> itemService.createCommentToItem(user2.getId(),
-                CommentMapper.toCommentDto(makeComment(null, user2, item, "")),
+        assertThrows(ValidationException.class, () -> itemService.createCommentToItem(booker.getId(),
+                CommentMapper.toCommentDto(makeComment(null, booker, item, "")),
                 item.getId()), "Incorrect exception");
     }
 
     @Test
     void test9_createCommentToItemWithIncorrectItemId() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
-        bookingRepository.save(makeBooking(null, user2, item, LocalDateTime.now().minusDays(5),
+                owner.getId(), true, null));
+        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
                 LocalDateTime.now().minusDays(1)));
 
-        assertThrows(IncorrectUserIdException.class, () -> itemService.createCommentToItem(user2.getId(),
-                CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+        assertThrows(IncorrectUserIdException.class, () -> itemService.createCommentToItem(booker.getId(),
+                CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                 3L), "Incorrect exception");
     }
 
     @Test
     void test10_createCommentToItemWhenBookingNotFound() {
-        User user1 = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User user2 = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                user1.getId(), true, null));
+                owner.getId(), true, null));
 
         final BookingNotFoundException exception = assertThrows(BookingNotFoundException.class,
-                () -> itemService.createCommentToItem(user2.getId(),
-                        CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+                () -> itemService.createCommentToItem(booker.getId(),
+                        CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                         item.getId()));
         assertEquals("This booking doesn't exist", exception.getMessage(),
                 "incorrect message");
-        assertThrows(BookingNotFoundException.class, () -> itemService.createCommentToItem(user2.getId(),
-                CommentMapper.toCommentDto(makeComment(null, user2, item, "Really great")),
+        assertThrows(BookingNotFoundException.class, () -> itemService.createCommentToItem(booker.getId(),
+                CommentMapper.toCommentDto(makeComment(null, booker, item, "Really great")),
                 item.getId()), "Incorrect exception");
     }
 

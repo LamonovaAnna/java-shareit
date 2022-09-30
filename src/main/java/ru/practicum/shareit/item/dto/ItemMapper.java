@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto, Long ownerId) {
-        if (itemDto == null) {
-            return null;
-        }
         Item item = new Item();
         item.setId(itemDto.getId() != null ? itemDto.getId() : null);
         item.setOwnerId(ownerId);
@@ -25,10 +22,7 @@ public class ItemMapper {
     }
 
     public static ItemDto toItemDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemDto(item.getId(),
+        return item == null ? null : new ItemDto(item.getId(),
                 item.getOwnerId(),
                 item.getName(),
                 item.getDescription(),
@@ -37,10 +31,7 @@ public class ItemMapper {
     }
 
     public static ItemBookingDto toItemBookingDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemBookingDto(item.getId(),
+        return item == null ? null : new ItemBookingDto(item.getId(),
                 item.getOwnerId(),
                 item.getName(),
                 item.getDescription(),
@@ -51,10 +42,7 @@ public class ItemMapper {
     }
 
     public static ItemShortDto toItemShortDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemShortDto(item.getId(),
+        return item == null ? null : new ItemShortDto(item.getId(),
                 item.getName());
     }
 

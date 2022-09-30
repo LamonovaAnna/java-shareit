@@ -31,18 +31,16 @@ public class UserServiceImplUnitTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-
-    private final User user1 = makeUser(1L, "test", "user@yandex.ru");
-    private final User user2 = makeUser(2L, "test", "user2@yandex.ru");
-
+    private final User firstUser = makeUser(1L, "test", "user@yandex.ru");
+    private final User secondUser = makeUser(2L, "test", "user2@yandex.ru");
 
     @Test
     void test1_createCorrectUser() {
         Mockito
                 .when(userRepository.save(Mockito.any(User.class)))
-                .thenReturn(user1);
+                .thenReturn(firstUser);
 
-        UserDto user = userService.createUser(UserMapper.toUserDto(user1));
+        UserDto user = userService.createUser(UserMapper.toUserDto(firstUser));
 
         assertThat(user).isNotNull();
         Mockito.verify(userRepository, times(1)).save(Mockito.any(User.class));
@@ -83,13 +81,13 @@ public class UserServiceImplUnitTest {
     @Test
     void test4_getUserByCorrectId() {
         Mockito
-                .when(userRepository.findById(1L))
-                .thenReturn(Optional.of(user1));
+                .when(userRepository.findById(Mockito.anyLong()))
+                .thenReturn(Optional.of(firstUser));
 
         UserDto user = userService.findUserById(1L);
 
         assertThat(user).isNotNull();
-        Mockito.verify(userRepository, times(1)).findById(1L);
+        Mockito.verify(userRepository, times(1)).findById(Mockito.anyLong());
     }
 
     @Test
@@ -108,7 +106,7 @@ public class UserServiceImplUnitTest {
     void test6_getAllUsers() {
         Mockito
                 .when(userRepository.findAll())
-                .thenReturn(List.of(user1, user2));
+                .thenReturn(List.of(firstUser, secondUser));
 
         List<UserDto> users = userService.getAllUsers();
 

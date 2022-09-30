@@ -26,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {
     @MockBean
-    UserService userService;
+    private UserService userService;
 
     @Autowired
     private MockMvc mvc;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     private final UserDto userDto = new UserDto(null, "test", "test@yandex.ru");
     private final UserDto savedUser1 = new UserDto(1L, "test1", "test@yandex.ru");
@@ -153,5 +153,40 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void test8_updateUser() throws Exception {
+        UserDto userForUpdate = new UserDto(null, "update", null);
+        savedUser1.setName(userForUpdate.getName());
+        Mockito
+                .when(userService.updateUser(userForUpdate, 1L))
+                .thenReturn(savedUser1);
+
+        mvc.perform(patch("/users/1")
+                        .content(mapper.writeValueAsString(userForUpdate))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is(savedUser1.getName())))
+                .andExpect(jsonPath("$.email", is(savedUser1.getEmail())));
+
+        Mockito.verify(userService, times(1)).updateUser(userForUpdate, 1L);
+    }
+
+    @Test
+    void test9_createUserDuplicateEmail() throws Exception {
+        Mockito
+                .when(userService.createUser(Mockito.any(UserDto.class)))
+                .thenThrow(RuntimeException.class);
+
+        mvc.perform(post("/users")
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
     }
 }

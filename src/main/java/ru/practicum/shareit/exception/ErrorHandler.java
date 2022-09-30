@@ -18,12 +18,6 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({EmailAlreadyExistException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleExistingException(final RuntimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
     @ExceptionHandler({ValidationException.class, ItemNotAvailableException.class, IncorrectStatusException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final RuntimeException e) {

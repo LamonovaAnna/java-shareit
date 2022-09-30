@@ -9,51 +9,43 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.Repository.ItemRepository;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
     @Override
     public BookingShortDto createBooking(BookingShortDto bookingDto, long bookerId) {
-        userService.findUserById(bookerId);
-
-        if (!itemRepository.existsById(bookingDto.getItemId())) {
+        checkUserExist(bookerId);
+        if (itemRepository.findById(bookingDto.getItemId()).isEmpty()) {
             log.info("Item not found");
             throw new ItemNotFoundException();
-        } else if (itemRepository.getReferenceById(bookingDto.getItemId()).getOwnerId() == bookerId) {
+        } else if (itemRepository.findById(bookingDto.getItemId()).get().getOwnerId() == bookerId) {
             log.info("Owner cannot reserve his own item");
             throw new IncorrectUserIdException();
-        } else if (!itemRepository.getReferenceById(bookingDto.getItemId()).getIsAvailable()) {
+        } else if (!itemRepository.findById(bookingDto.getItemId()).get().getIsAvailable()) {
             log.info("Item doesn't available");
             throw new ItemNotAvailableException();
         } else if (!isDateValid(bookingDto)) {
             throw new ValidationException("Incorrect start or end time");
         }
-
         bookingDto.setBookerId(bookerId);
         return BookingMapper.toBookingShortDto(bookingRepository.save(BookingMapper.toBooking(bookingDto)));
     }
 
     @Override
     public BookingDto findBookingById(long bookingId, long userId) {
-        if (!bookingRepository.existsById(bookingId)) {
-            log.info("Booking not found");
-            throw new BookingNotFoundException();
-        }
-
-        Booking booking = bookingRepository.getReferenceById(bookingId);
-        if (!Objects.equals(booking.getBooker().getId(), userId) && !isOwner(booking, userId)) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
+        if (booking.getBooker().getId() != userId && booking.getItem().getOwnerId() != userId) {
             log.info("Incorrect user id");
             throw new IncorrectUserIdException();
         }
@@ -62,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findBookingsByBooker(long bookerId, String state, Integer from, Integer size) {
-        userService.findUserById(bookerId);
+        checkUserExist(bookerId);
         checkPaginationParametersAreCorrect(from, size);
         PageRequest pageable = PageRequest.of(from / size, size, Sort.by("startBooking").descending());
 
@@ -77,13 +69,13 @@ public class BookingServiceImpl implements BookingService {
             case "FUTURE":
                 return BookingMapper.toBookingsDto(
                         bookingRepository.findAllByBookerIdAndStartBookingIsAfter(
-                        bookerId, LocalDateTime.now(), pageable));
+                                bookerId, LocalDateTime.now(), pageable));
             case "WAITING":
                 return BookingMapper.toBookingsDto(bookingRepository.findAllByBookerIdAndStatus(
                         bookerId, BookingStatus.WAITING, pageable));
             case "REJECTED":
-                return BookingMapper.toBookingsDto(bookingRepository.findAllByBookerIdAndStatus(
-                        bookerId, BookingStatus.REJECTED, pageable));
+                return BookingMapper.toBookingsDto(bookingRepository.findAllByBookerIdAndStatus(bookerId,
+                        BookingStatus.REJECTED, pageable));
             case "ALL":
                 return BookingMapper.toBookingsDto(bookingRepository.findAllByBookerId(bookerId, pageable));
             default:
@@ -93,8 +85,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> findBookingsByOwner(long ownerId, String state,Integer from, Integer size) {
-        userService.findUserById(ownerId);
+    public List<BookingDto> findBookingsByOwner(long ownerId, String state, Integer from, Integer size) {
+        checkUserExist(ownerId);
         checkPaginationParametersAreCorrect(from, size);
         PageRequest pageable = PageRequest.of(from / size, size, Sort.by("startBooking").descending());
 
@@ -109,8 +101,8 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.toBookingsDto(bookingRepository.findAllBookingsByOwnerAndStatus(
                         ownerId, BookingStatus.WAITING, pageable));
             case "REJECTED":
-                return BookingMapper.toBookingsDto(bookingRepository.findAllBookingsByOwnerAndStatus(
-                        ownerId, BookingStatus.REJECTED, pageable));
+                return BookingMapper.toBookingsDto(bookingRepository.findAllBookingsByOwnerAndStatus(ownerId,
+                        BookingStatus.REJECTED, pageable));
             case "ALL":
                 return BookingMapper.toBookingsDto(bookingRepository.findAllBookingsByOwner(ownerId, pageable));
             default:
@@ -121,45 +113,39 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto approveOrRejectBooking(long ownerId, long bookingId, boolean isApproved) {
-        if (bookingRepository.existsById(bookingId)) {
-            Booking booking = bookingRepository.getReferenceById(bookingId);
-            userService.findUserById(ownerId);
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
+        checkUserExist(ownerId);
+        checkIsOwner(booking, ownerId);
 
-            if (!isOwner(booking, ownerId)) {
-                log.info("Incorrect user id");
-                throw new IncorrectUserIdException();
-            } else if (!booking.getStatus().equals(BookingStatus.WAITING)) {
-                throw new IncorrectStatusException("Booking's status was updated earlier");
-            } else {
-                if (!isApproved) {
-                    booking.setStatus(BookingStatus.REJECTED);
-                } else {
-                    booking.setStatus(BookingStatus.APPROVED);
-                }
-                return BookingMapper.toBookingDto(bookingRepository.save(booking));
-            }
+        if (!booking.getStatus().equals(BookingStatus.WAITING)) {
+            throw new IncorrectStatusException("Booking's status was updated earlier");
         }
-        log.info("Booking not found");
-        throw new BookingNotFoundException();
+        if (!isApproved) {
+            booking.setStatus(BookingStatus.REJECTED);
+        } else {
+            booking.setStatus(BookingStatus.APPROVED);
+        }
+        return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     private boolean isDateValid(BookingShortDto bookingDto) {
-        if (bookingDto.getStart() != null || bookingDto.getEnd() != null) {
-            if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
-                log.info("Incorrect start time");
-                return false;
-            } else if (bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
-                    bookingDto.getEnd().equals(bookingDto.getStart())) {
-                log.info("Incorrect end time");
-                return false;
-            }
-            return true;
+        if (bookingDto.getEnd() != null && bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
+                bookingDto.getEnd().equals(bookingDto.getStart())) {
+            log.info("Incorrect end time");
+            return false;
+        }
+        if (bookingDto.getStart() != null && bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            log.info("Incorrect start time");
+            return false;
         }
         return true;
     }
 
-    private boolean isOwner(Booking booking, long ownerId) {
-        return booking.getItem().getOwnerId() == ownerId;
+    private void checkIsOwner(Booking booking, long ownerId) {
+        if (booking.getItem().getOwnerId() != ownerId) {
+            log.info("Incorrect user id");
+            throw new IncorrectUserIdException();
+        }
     }
 
     private void checkPaginationParametersAreCorrect(Integer from, Integer size) {
@@ -170,6 +156,13 @@ public class BookingServiceImpl implements BookingService {
         if (size != null && size <= 0) {
             log.info("Parameter \"size\" have to be above zero");
             throw new ValidationException("Incorrect parameter \"size\"");
+        }
+    }
+
+    private void checkUserExist(Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.info("Incorrect user id");
+            throw new UserNotFoundException();
         }
     }
 }

@@ -2,8 +2,6 @@ package ru.practicum.shareit.request;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemBookingDto;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithItemsDto;
 
@@ -22,7 +20,7 @@ public class ItemRequestController {
 
     @PostMapping()
     public ItemRequestDto createItemRequest(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @Valid @RequestBody ItemRequestDto itemRequestDto) {
+                                            @Valid @RequestBody ItemRequestDto itemRequestDto) {
         return itemRequestService.createItemRequest(itemRequestDto, userId);
     }
 
@@ -42,7 +40,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ItemRequestWithItemsDto getRequestById(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                        @PathVariable long requestId) {
+                                                  @PathVariable long requestId) {
         return itemRequestService.getRequestById(userId, requestId);
     }
 

@@ -14,10 +14,6 @@ import java.util.stream.Collectors;
 public class ItemRequestMapper {
 
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, Long requesterId) {
-        if (itemRequestDto == null) {
-            return null;
-        }
-
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setId(itemRequestDto.getId() != null ? itemRequestDto.getId() : null);
         itemRequest.setDescription(itemRequestDto.getDescription());
@@ -27,22 +23,18 @@ public class ItemRequestMapper {
     }
 
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
-        if (itemRequest == null) {
-            return null;
-        }
-        return new ItemRequestDto(itemRequest.getId(),
+        return itemRequest == null ? null : new ItemRequestDto(itemRequest.getId(),
                 itemRequest.getDescription(),
-                new UserShortDto(itemRequest.getRequester().getId(), itemRequest.getRequester().getName()),
+                itemRequest.getRequester() == null ? UserMapper.toUserShortDto(itemRequest.getRequester())
+                        : new UserShortDto(itemRequest.getRequester().getId(), itemRequest.getRequester().getName()),
                 itemRequest.getCreated());
     }
 
     public static ItemRequestWithItemsDto toItemRequestWithItemsDto(ItemRequest itemRequest) {
-        if (itemRequest == null) {
-            return null;
-        }
-        return new ItemRequestWithItemsDto(itemRequest.getId(),
+        return itemRequest == null ? null : new ItemRequestWithItemsDto(itemRequest.getId(),
                 itemRequest.getDescription(),
-                new UserShortDto(itemRequest.getRequester().getId(), itemRequest.getRequester().getName()),
+                itemRequest.getRequester() == null ? UserMapper.toUserShortDto(itemRequest.getRequester())
+                        : new UserShortDto(itemRequest.getRequester().getId(), itemRequest.getRequester().getName()),
                 itemRequest.getCreated(),
                 ItemMapper.toItemsDto(new ArrayList<>(itemRequest.getItems())));
     }

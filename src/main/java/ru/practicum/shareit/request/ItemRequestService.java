@@ -3,7 +3,6 @@ package ru.practicum.shareit.request;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithItemsDto;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
 
 public interface ItemRequestService {

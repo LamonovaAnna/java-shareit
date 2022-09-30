@@ -16,8 +16,8 @@ import ru.practicum.shareit.exception.IncorrectUserIdException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.Repository.CommentRepository;
-import ru.practicum.shareit.item.Repository.ItemRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -48,21 +48,13 @@ public class ItemServiceImplUnitTest {
     @InjectMocks
     private ItemServiceImpl itemService;
 
-    private final Item item = makeItem(1L,
-            "Bicycle",
-            "Very fast bicycle",
-            null,
-            true,
-            null);
-    private final Item savedItem = makeItem(1L,
-            "Bicycle",
-            "Very fast bicycle",
-            1L,
-            true,
-            null);
-
+    private final Item item = makeItem(1L, "Bicycle", "Very fast bicycle", null,
+            true, null);
+    private final Item savedItem = makeItem(1L, "Bicycle", "Very fast bicycle", 1L,
+            true, null);
     private final User user = makeUser(1L, "test", "user@yandex.ru");
     private final User user2 = makeUser(2L, "test", "user@mail.ru");
+
 
     @Test
     void test1_createCorrectItem() {
@@ -132,6 +124,14 @@ public class ItemServiceImplUnitTest {
 
     @Test
     void test5_updateItemWhenIsNotOwner() {
+        Mockito
+                .when(userRepository.findById(2L))
+                .thenReturn(Optional.of(user2));
+
+        Mockito
+                .when(itemRepository.getReferenceById(1L))
+                .thenReturn(savedItem);
+
         assertThrows(IncorrectUserIdException.class, () -> itemService.updateItem(
                 ItemMapper.toItemDto(savedItem), 2L, 1L), "Incorrect exception");
         Mockito.verify(itemRepository, Mockito.never()).save(Mockito.any(Item.class));

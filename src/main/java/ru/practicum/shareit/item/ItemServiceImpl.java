@@ -8,8 +8,8 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.Repository.CommentRepository;
-import ru.practicum.shareit.item.Repository.ItemRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.user.UserRepository;
@@ -31,17 +31,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) {
         checkItemValid(itemDto);
-        if (userRepository.findById(userId).isEmpty()) {
-            log.info("Incorrect user id");
-            throw new UserNotFoundException();
-        }
+        checkUserExist(userId);
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toItem(itemDto, userId)));
     }
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long userId, long itemId) {
-        if (userRepository.findById(userId).isEmpty() ||
-                itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
+        checkUserExist(userId);
+        if (itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
             log.info("Incorrect user id");
             throw new IncorrectUserIdException();
         }
@@ -51,9 +48,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemBookingDto> getAllItemsByOwner(long userId, Integer from, Integer size) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        checkUserExist(userId);
         checkPaginationParametersAreCorrect(from, size);
 
         List<ItemBookingDto> items = ItemMapper.toItemsBookingDto(itemRepository.findAllByOwnerId(
@@ -77,9 +72,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingDto findItemById(long itemId, Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        checkUserExist(userId);
         ItemBookingDto item = ItemMapper.toItemBookingDto(itemRepository.findById(itemId)
                 .orElseThrow(ItemNotFoundException::new));
         if (Objects.equals(item.getOwnerId(), userId)) {
@@ -101,8 +94,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(long itemId, long userId) {
-        if (userRepository.findById(userId).isEmpty() ||
-                itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
+        checkUserExist(userId);
+        if (itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
             log.info("Incorrect user id");
             throw new IncorrectUserIdException();
         }
@@ -171,13 +164,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void checkPaginationParametersAreCorrect(Integer from, Integer size) {
-        if (from != null && from < 0) {
+        if (from < 0) {
             log.info("Parameter \"from\" have to be above or equals zero");
             throw new ValidationException("Incorrect parameter \"from\"");
         }
-        if (size != null && size <= 0) {
+        if (size <= 0) {
             log.info("Parameter \"size\" have to be above zero");
             throw new ValidationException("Incorrect parameter \"size\"");
+        }
+    }
+
+    private void checkUserExist(Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.info("Incorrect user id");
+            throw new UserNotFoundException();
         }
     }
 }
