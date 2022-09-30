@@ -47,7 +47,7 @@ public class BookingController {
                                                 @RequestParam(defaultValue = "ALL", required = false) String state,
                                                 @RequestParam(required = false, defaultValue = "0") Integer from,
                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
-        return bookingService.findBookingsByOwner(ownerId, state ,from, size)
+        return bookingService.findBookingsByOwner(ownerId, state, from, size)
                 .stream()
                 .sorted(Comparator.comparing(BookingDto::getStart).reversed())
                 .collect(Collectors.toList());

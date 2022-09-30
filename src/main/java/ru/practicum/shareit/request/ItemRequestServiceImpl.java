@@ -46,7 +46,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         checkUserExist(userId);
 
         List<ItemRequestWithItemsDto> requests = new ArrayList<>();
-        if(from != null && size != null) {
+        if (from != null && size != null) {
             checkPagination(from, size);
             List<ItemRequest> requestTemp = itemRequestRepository.findAllByRequesterIdNot(
                     userId, PageRequest.of(from / size, size, Sort.by("created").descending()));
