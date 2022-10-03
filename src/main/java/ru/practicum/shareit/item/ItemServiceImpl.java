@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemDto itemDto, long userId, long itemId) {
         checkUserExist(userId);
         if (itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", userId);
             throw new IncorrectUserIdException();
         }
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toUpdateItem(
@@ -96,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
     public void deleteItem(long itemId, long userId) {
         checkUserExist(userId);
         if (itemRepository.getReferenceById(itemId).getOwnerId() != userId) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", userId);
             throw new IncorrectUserIdException();
         }
         itemRepository.deleteById(itemId);
@@ -176,7 +176,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void checkUserExist(Long userId) {
         if (userRepository.findById(userId).isEmpty()) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", userId);
             throw new UserNotFoundException();
         }
     }

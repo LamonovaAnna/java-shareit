@@ -114,7 +114,7 @@ public class ItemRequestServiceImplUnitTest {
 
         List<ItemRequestWithItemsDto> requests = itemRequestService.getAllRequestsByRequester(2L);
 
-        assertEquals(0,requests.size(),  "Incorrect list size");
+        assertEquals(0, requests.size(), "Incorrect list size");
         Mockito.verify(itemRequestRepository, times(1))
                 .findAllByRequesterIdOrderByCreatedAsc(Mockito.anyLong());
     }

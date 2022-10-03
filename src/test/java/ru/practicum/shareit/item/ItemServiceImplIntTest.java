@@ -128,8 +128,6 @@ public class ItemServiceImplIntTest {
                 () -> itemService.deleteItem(item.getId(), booker.getId()));
         assertEquals("Access error", exception.getMessage(),
                 "incorrect message");
-        assertThrows(IncorrectUserIdException.class, () -> itemService.deleteItem(item.getId(), booker.getId()),
-                "Incorrect exception");
 
         assertTrue(itemRepository.existsById(item.getId()), "Item was deleted");
     }

@@ -23,21 +23,11 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
+
     @Override
     public BookingShortDto createBooking(BookingShortDto bookingDto, long bookerId) {
         checkUserExist(bookerId);
-        if (itemRepository.findById(bookingDto.getItemId()).isEmpty()) {
-            log.info("Item not found");
-            throw new ItemNotFoundException();
-        } else if (itemRepository.findById(bookingDto.getItemId()).get().getOwnerId() == bookerId) {
-            log.info("Owner cannot reserve his own item");
-            throw new IncorrectUserIdException();
-        } else if (!itemRepository.findById(bookingDto.getItemId()).get().getIsAvailable()) {
-            log.info("Item doesn't available");
-            throw new ItemNotAvailableException();
-        } else if (!isDateValid(bookingDto)) {
-            throw new ValidationException("Incorrect start or end time");
-        }
+        bookingValidation(bookingDto, bookerId);
         bookingDto.setBookerId(bookerId);
         return BookingMapper.toBookingShortDto(bookingRepository.save(BookingMapper.toBooking(bookingDto)));
     }
@@ -46,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto findBookingById(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
         if (booking.getBooker().getId() != userId && booking.getItem().getOwnerId() != userId) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", userId);
             throw new IncorrectUserIdException();
         }
         return BookingMapper.toBookingDto(booking);
@@ -131,11 +121,11 @@ public class BookingServiceImpl implements BookingService {
     private boolean isDateValid(BookingShortDto bookingDto) {
         if (bookingDto.getEnd() != null && bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
                 bookingDto.getEnd().equals(bookingDto.getStart())) {
-            log.info("Incorrect end time");
+            log.info("Incorrect end time {}", bookingDto.getEnd());
             return false;
         }
         if (bookingDto.getStart() != null && bookingDto.getStart().isBefore(LocalDateTime.now())) {
-            log.info("Incorrect start time");
+            log.info("Incorrect start time {}", bookingDto.getStart());
             return false;
         }
         return true;
@@ -143,7 +133,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkIsOwner(Booking booking, long ownerId) {
         if (booking.getItem().getOwnerId() != ownerId) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", ownerId);
             throw new IncorrectUserIdException();
         }
     }
@@ -161,8 +151,23 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkUserExist(Long userId) {
         if (userRepository.findById(userId).isEmpty()) {
-            log.info("Incorrect user id");
+            log.info("Incorrect user id {}", userId);
             throw new UserNotFoundException();
+        }
+    }
+
+    private void bookingValidation(BookingShortDto bookingDto, long bookerId) {
+        if (itemRepository.findById(bookingDto.getItemId()).isEmpty()) {
+            log.info("Item with id {} not found", bookingDto.getItemId());
+            throw new ItemNotFoundException();
+        } else if (itemRepository.findById(bookingDto.getItemId()).get().getOwnerId() == bookerId) {
+            log.info("Owner cannot reserve his own item");
+            throw new IncorrectUserIdException();
+        } else if (!itemRepository.findById(bookingDto.getItemId()).get().getIsAvailable()) {
+            log.info("Item with id {} doesn't available", bookingDto.getItemId());
+            throw new ItemNotAvailableException();
+        } else if (!isDateValid(bookingDto)) {
+            throw new ValidationException("Incorrect start or end time");
         }
     }
 }
