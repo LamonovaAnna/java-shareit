@@ -133,7 +133,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test5_findItemsByNameOrDescription() {
+    void test5_findItemsByName() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
                 owner.getId(), true, null));
@@ -145,18 +145,36 @@ public class ItemServiceImplIntTest {
         assertNotNull(foundBicycle);
         assertEquals(1, foundBicycle.size(), "Incorrect list size");
         assertEquals("Bicycle", foundBicycle.get(0).getName(), "Was found incorrect item");
+    }
 
-        List<ItemDto> foundBook = itemService.findItemsByNameOrDescription("inter", 0, 10);
-        assertNotNull(foundBook);
-        assertEquals(1, foundBook.size(), "Incorrect list size");
-        assertEquals("Book", foundBook.get(0).getName(), "Was found incorrect item");
+    @Test
+    void test6_findItemsByDescription() {
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
+                owner.getId(), true, null));
+        itemRepository.save(makeItem(null, "Book", "Very interesting book",
+                owner.getId(), true, null));
 
         List<ItemDto> foundNothing = itemService.findItemsByNameOrDescription("driv", 0, 10);
         assertEquals(0, foundNothing.size(), "Incorrect list size");
     }
 
     @Test
-    void test6_createCommentToItem() {
+    void test7_findItemsByNameOrDescriptionWhenTheRequestedItemIsNotFound() {
+        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
+        itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
+                owner.getId(), true, null));
+        itemRepository.save(makeItem(null, "Book", "Very interesting book",
+                owner.getId(), true, null));
+
+        List<ItemDto> foundBook = itemService.findItemsByNameOrDescription("inter", 0, 10);
+        assertNotNull(foundBook);
+        assertEquals(1, foundBook.size(), "Incorrect list size");
+        assertEquals("Book", foundBook.get(0).getName(), "Was found incorrect item");
+    }
+
+    @Test
+    void test8_createCommentToItem() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
@@ -174,7 +192,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test7_createCommentToItemWithIncorrectAuthor() {
+    void test9_createCommentToItemWithIncorrectAuthor() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
@@ -194,7 +212,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test8_createCommentToItemWithIncorrectCommentText() {
+    void test10_createCommentToItemWithIncorrectCommentText() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
@@ -214,7 +232,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test9_createCommentToItemWithIncorrectItemId() {
+    void tes11_createCommentToItemWithIncorrectItemId() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
@@ -228,7 +246,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test10_createCommentToItemWhenBookingNotFound() {
+    void test12_createCommentToItemWhenBookingNotFound() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",

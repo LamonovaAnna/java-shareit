@@ -27,7 +27,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingShortDto createBooking(BookingShortDto bookingDto, long bookerId) {
         checkUserExist(bookerId);
-        bookingValidation(bookingDto, bookerId);
+        validateBooking(bookingDto, bookerId);
         bookingDto.setBookerId(bookerId);
         return BookingMapper.toBookingShortDto(bookingRepository.save(BookingMapper.toBooking(bookingDto)));
     }
@@ -156,7 +156,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void bookingValidation(BookingShortDto bookingDto, long bookerId) {
+    private void validateBooking(BookingShortDto bookingDto, long bookerId) {
         if (itemRepository.findById(bookingDto.getItemId()).isEmpty()) {
             log.info("Item with id {} not found", bookingDto.getItemId());
             throw new ItemNotFoundException();
