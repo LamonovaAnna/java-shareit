@@ -11,15 +11,10 @@ public class ErrorHandler {
     @ExceptionHandler({UserNotFoundException.class,
             ItemNotFoundException.class,
             IncorrectUserIdException.class,
-            BookingNotFoundException.class})
+            BookingNotFoundException.class,
+            RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler({EmailAlreadyExistException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleExistingException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());
     }
 

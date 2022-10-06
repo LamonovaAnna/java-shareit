@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,36 +10,28 @@ import java.util.stream.Collectors;
 public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto, Long ownerId) {
-        if (itemDto == null) {
-            return null;
-        }
         Item item = new Item();
-        item.setId(itemDto.getId());
+        item.setId(itemDto.getId() != null ? itemDto.getId() : null);
         item.setOwnerId(ownerId);
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setIsAvailable(itemDto.getIsAvailable());
-        item.setRequestId(itemDto.getRequestId() != null ? itemDto.getRequestId() : null);
+        item.setRequest(itemDto.getRequestId() == null ? item.getRequest() : new ItemRequest(
+                itemDto.getRequestId(), null, null, null, null));
         return item;
     }
 
     public static ItemDto toItemDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemDto(item.getId(),
+        return item == null ? null : new ItemDto(item.getId(),
                 item.getOwnerId(),
                 item.getName(),
                 item.getDescription(),
                 item.getIsAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null);
+                item.getRequest() != null ? item.getRequest().getId() : null);
     }
 
     public static ItemBookingDto toItemBookingDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemBookingDto(item.getId(),
+        return item == null ? null : new ItemBookingDto(item.getId(),
                 item.getOwnerId(),
                 item.getName(),
                 item.getDescription(),
@@ -49,12 +42,10 @@ public class ItemMapper {
     }
 
     public static ItemShortDto toItemShortDto(Item item) {
-        if (item == null) {
-            return null;
-        }
-        return new ItemShortDto(item.getId(),
+        return item == null ? null : new ItemShortDto(item.getId(),
                 item.getName());
     }
+
 
     public static Item toUpdateItem(Item item, Item updateItem) {
         item.setName(updateItem.getName() == null ? item.getName() : updateItem.getName());

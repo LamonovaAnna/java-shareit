@@ -33,8 +33,10 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> findBookingsByBooker(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                                 @RequestParam(defaultValue = "ALL", required = false) String state) {
-        return bookingService.findBookingsByBooker(bookerId, state)
+                                                 @RequestParam(defaultValue = "ALL", required = false) String state,
+                                                 @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return bookingService.findBookingsByBooker(bookerId, state, from, size)
                 .stream()
                 .sorted(Comparator.comparing(BookingDto::getStart).reversed())
                 .collect(Collectors.toList());
@@ -42,15 +44,17 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> findBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                @RequestParam(defaultValue = "ALL", required = false) String state) {
-        return bookingService.findBookingsByOwner(ownerId, state)
+                                                @RequestParam(defaultValue = "ALL", required = false) String state,
+                                                @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return bookingService.findBookingsByOwner(ownerId, state, from, size)
                 .stream()
                 .sorted(Comparator.comparing(BookingDto::getStart).reversed())
                 .collect(Collectors.toList());
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto confirmOrRejectBooking(@RequestHeader("X-Sharer-User-Id") long ownerId,
+    public BookingDto approveOrRejectBooking(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                              @PathVariable long bookingId,
                                              @RequestParam boolean approved) {
         return bookingService.approveOrRejectBooking(ownerId, bookingId, approved);

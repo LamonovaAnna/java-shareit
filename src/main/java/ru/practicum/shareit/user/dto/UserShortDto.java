@@ -1,12 +1,14 @@
 package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
 @AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
 public class UserShortDto {
     private Long id;
     private String name;

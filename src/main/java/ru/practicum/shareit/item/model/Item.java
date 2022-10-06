@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.shareit.request.ItemRequest;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -31,5 +32,7 @@ public class Item {
     @Column(name = "available")
     private Boolean isAvailable;
 
-    private Long requestId;
+    @OneToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 }

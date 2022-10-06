@@ -11,9 +11,6 @@ import java.util.stream.Collectors;
 public class CommentMapper {
 
     public static Comment toComment(CommentDto commentDto, Long authorId, Long itemId) {
-        if (commentDto == null) {
-            return null;
-        }
         Comment comment = new Comment();
         comment.setId(commentDto.getId());
         comment.setText(commentDto.getText());
@@ -26,10 +23,7 @@ public class CommentMapper {
     }
 
     public static CommentDto toCommentDto(Comment comment) {
-        if (comment == null) {
-            return null;
-        }
-        return new CommentDto(comment.getId(),
+        return comment == null ? null : new CommentDto(comment.getId(),
                 comment.getText(),
                 new ItemShortDto(comment.getId(), null),
                 null,
@@ -37,10 +31,7 @@ public class CommentMapper {
     }
 
     public static CommentShortDto toCommentShortDto(Comment comment) {
-        if (comment == null) {
-            return null;
-        }
-        return new CommentShortDto(comment.getId(),
+        return comment == null ? null : new CommentShortDto(comment.getId(),
                 comment.getText(),
                 comment.getAuthor().getName(),
                 comment.getCreated());

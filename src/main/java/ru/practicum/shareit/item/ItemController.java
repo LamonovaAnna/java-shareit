@@ -33,13 +33,15 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemBookingDto> getAllItemsByOwner(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
-        return itemService.getAllItemsByOwner(userId);
+    public List<ItemBookingDto> getAllItemsByOwner(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                                   @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                   @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return itemService.getAllItemsByOwner(userId, from, size);
     }
 
     @GetMapping("/{id}")
     public ItemBookingDto findItemById(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                           @PathVariable(value = "id") long itemId) {
+                                       @PathVariable(value = "id") long itemId) {
         return itemService.findItemById(itemId, userId);
     }
 
@@ -50,8 +52,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> findItemsByNameOrDescription(@RequestParam(value = "text", required = false) String text) {
-        return itemService.findItemsByNameOrDescription(text);
+    public List<ItemDto> findItemsByNameOrDescription(@RequestParam(value = "text", required = false) String text,
+                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                      @RequestParam(required = false,
+                                                              defaultValue = "10") Integer size) {
+        return itemService.findItemsByNameOrDescription(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

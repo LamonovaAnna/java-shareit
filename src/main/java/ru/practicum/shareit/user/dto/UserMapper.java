@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
 public class UserMapper {
 
     public static User toUser(UserDto userDto) {
-        if (userDto == null) {
-            return null;
-        }
         User user = new User();
         user.setId(userDto.getId() != null ? userDto.getId() : null);
         user.setName(userDto.getName());
@@ -23,10 +20,11 @@ public class UserMapper {
     }
 
     public static UserDto toUserDto(User user) {
-        if (user == null) {
-            return null;
-        }
-        return new UserDto(user.getId(), user.getName(), user.getEmail());
+        return user == null ? null : new UserDto(user.getId(), user.getName(), user.getEmail());
+    }
+
+    public static UserShortDto toUserShortDto(User user) {
+        return user == null ? null : new UserShortDto(user.getId(), user.getName());
     }
 
     public static User toUpdateUser(User user, User updateUser) {
