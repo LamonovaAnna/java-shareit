@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
-import ru.practicum.shareit.booking.dto.BookingState;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -36,25 +35,21 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> findBookingsByBooker(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                       @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                       @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                       @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+    public ResponseEntity<Object> findBookingsByBooker(@RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+                                                       @RequestHeader("X-Sharer-User-Id") long userId,
+                                                       @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                       @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get booking with state {}, bookerId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.findBookingsByBooker(userId, state, from, size);
+        return bookingClient.findBookingsByBooker(userId, stateParam, from, size);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> findBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                      @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+                                                      @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+                                                      @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                      @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get booking with state {}, bookerId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.findBookingsByOwner(userId, state, from, size);
+        return bookingClient.findBookingsByOwner(userId, stateParam, from, size);
     }
 
     @PatchMapping("/{bookingId}")

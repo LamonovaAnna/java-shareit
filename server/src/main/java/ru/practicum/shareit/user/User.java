@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "users", schema = "public")
@@ -21,7 +20,6 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @Email
     @Column(nullable = false)
     private String email;
 }
