@@ -6,7 +6,6 @@ import lombok.ToString;
 import ru.practicum.shareit.request.ItemRequest;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "items", schema = "public")
@@ -22,11 +21,9 @@ public class Item {
     @Column(name = "owner_id")
     private Long ownerId;
 
-    @Size(max = 20)
     @Column(nullable = false)
     private String name;
 
-    @Size(max = 500)
     private String description;
 
     @Column(name = "available")

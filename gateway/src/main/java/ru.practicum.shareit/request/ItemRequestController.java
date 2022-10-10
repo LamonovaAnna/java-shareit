@@ -34,9 +34,10 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAllRequestsWithPagination(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                               @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                               @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> getAllRequestsWithPagination(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Get requests by userId={}, from={}, size={}", userId, from, size);
         return itemRequestClient.getAllRequestsWithPagination(userId, from, size);
     }

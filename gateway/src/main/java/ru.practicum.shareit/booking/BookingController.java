@@ -35,19 +35,21 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> findBookingsByBooker(@RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-                                                       @RequestHeader("X-Sharer-User-Id") long userId,
-                                                       @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                       @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> findBookingsByBooker(
+            @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get booking with state {}, bookerId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.findBookingsByBooker(userId, stateParam, from, size);
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> findBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                      @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-                                                      @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                      @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> findBookingsByOwner(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get booking with state {}, bookerId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.findBookingsByOwner(userId, stateParam, from, size);
     }

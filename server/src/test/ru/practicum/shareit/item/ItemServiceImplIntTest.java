@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.BookingNotFoundException;
 import ru.practicum.shareit.exception.IncorrectUserIdException;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
@@ -84,28 +83,6 @@ public class ItemServiceImplIntTest {
                 "Incorrect comment id");
     }
 
-    @Test
-    void test3_findItemByIdUserIsNotOwner() {
-        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
-        Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                owner.getId(), true, null));
-        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
-                LocalDateTime.now().minusDays(1)));
-        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(2)));
-        commentRepository.save(makeComment(null, booker, item, "Really great"));
-
-        ItemBookingDto returnedItem = itemService.findItemById(item.getId(), booker.getId());
-
-        Assertions.assertNotNull(returnedItem);
-        assertEquals(item.getId(), returnedItem.getId(), "Incorrect Id");
-        assertEquals("Bicycle", returnedItem.getName(), "Incorrect name");
-        Assertions.assertNull(returnedItem.getLastBooking());
-        Assertions.assertNotNull(returnedItem.getComments());
-        assertEquals(1L, returnedItem.getComments().stream().findFirst().get().getId(),
-                "Incorrect comment id");
-    }
 
     @Test
     void test3_deleteItem() {
@@ -213,27 +190,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test10_createCommentToItemWithIncorrectCommentText() {
-        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
-        Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                owner.getId(), true, null));
-        bookingRepository.save(makeBooking(null, booker, item, LocalDateTime.now().minusDays(5),
-                LocalDateTime.now().minusDays(1)));
-
-        final ValidationException exception = Assertions.assertThrows(ValidationException.class,
-                () -> itemService.createCommentToItem(booker.getId(),
-                        CommentMapper.toCommentDto(makeComment(null, booker, item, "")),
-                        item.getId()));
-        assertEquals("Comment can't be empty", exception.getMessage(),
-                "incorrect message");
-        assertThrows(ValidationException.class, () -> itemService.createCommentToItem(booker.getId(),
-                CommentMapper.toCommentDto(makeComment(null, booker, item, "")),
-                item.getId()), "Incorrect exception");
-    }
-
-    @Test
-    void tes11_createCommentToItemWithIncorrectItemId() {
+    void tes10_createCommentToItemWithIncorrectItemId() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
@@ -247,7 +204,7 @@ public class ItemServiceImplIntTest {
     }
 
     @Test
-    void test12_createCommentToItemWhenBookingNotFound() {
+    void test11_createCommentToItemWhenBookingNotFound() {
         User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
         User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
         Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",

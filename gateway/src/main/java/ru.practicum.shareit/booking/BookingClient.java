@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -9,10 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.client.BaseClient;
+import ru.practicum.shareit.exception.ValidationException;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class BookingClient extends BaseClient {
     private static final String API_PREFIX = "/bookings";
 
@@ -27,6 +31,9 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> createBooking(long userId, BookingShortDto bookingDto) {
+        if (!isDateValid(bookingDto)) {
+            throw new ValidationException("Incorrect start or end time");
+        }
         return post("", userId, bookingDto);
     }
 
@@ -54,5 +61,18 @@ public class BookingClient extends BaseClient {
 
     public ResponseEntity<Object> approveOrRejectBooking(long ownerId, long bookingId, boolean approved) {
         return patch("/" + bookingId + "?approved=" + approved, ownerId);
+    }
+
+    private boolean isDateValid(BookingShortDto bookingDto) {
+        if (bookingDto.getEnd() != null && bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
+                bookingDto.getEnd().equals(bookingDto.getStart())) {
+            log.info("Incorrect end time {}", bookingDto.getEnd());
+            return false;
+        }
+        if (bookingDto.getStart() != null && bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            log.info("Incorrect start time {}", bookingDto.getStart());
+            return false;
+        }
+        return true;
     }
 }

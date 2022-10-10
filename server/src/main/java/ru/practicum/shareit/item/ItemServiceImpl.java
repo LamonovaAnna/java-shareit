@@ -30,7 +30,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) {
-        checkItemValid(itemDto);
         checkUserExist(userId);
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toItem(itemDto, userId)));
     }
@@ -49,7 +48,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemBookingDto> getAllItemsByOwner(long userId, Integer from, Integer size) {
         checkUserExist(userId);
-        checkPaginationParametersAreCorrect(from, size);
 
         List<ItemBookingDto> items = ItemMapper.toItemsBookingDto(itemRepository.findAllByOwnerId(
                 userId, PageRequest.of(from / size, size)));
@@ -104,7 +102,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findItemsByNameOrDescription(String text, Integer from, Integer size) {
-        checkPaginationParametersAreCorrect(from, size);
         if (text != null && !text.isBlank()) {
             String textForSearch = text.toLowerCase();
             return ItemMapper.toItemsDto(itemRepository.findAll(
@@ -122,9 +119,6 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto createCommentToItem(long authorId, CommentDto commentDto, long itemId) {
         if (userRepository.findById(authorId).isEmpty()) {
             throw new UserNotFoundException();
-        }
-        if (commentDto.getText().isBlank() || commentDto.getText().isEmpty()) {
-            throw new ValidationException("Comment can't be empty");
         }
         if (!itemRepository.existsById(itemId)) {
             throw new IncorrectUserIdException();
@@ -146,32 +140,6 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("User has not reserved this item");
         }
         return comment;
-    }
-
-    private void checkItemValid(ItemDto item) {
-        if (item.getName() == null || item.getName().isBlank()) {
-            log.info("Field \"name\" doesn't filled");
-            throw new ValidationException("Incorrect item name");
-        }
-        if (item.getDescription() == null || item.getDescription().isBlank()) {
-            log.info("Field \"description\" doesn't filled");
-            throw new ValidationException("Incorrect item description");
-        }
-        if (item.getIsAvailable() == null) {
-            log.info("Field \"available\" doesn't filled");
-            throw new ValidationException("Field \"isAvailable\" must be filled");
-        }
-    }
-
-    private void checkPaginationParametersAreCorrect(Integer from, Integer size) {
-        if (from < 0) {
-            log.info("Parameter \"from\" have to be above or equals zero");
-            throw new ValidationException("Incorrect parameter \"from\"");
-        }
-        if (size <= 0) {
-            log.info("Parameter \"size\" have to be above zero");
-            throw new ValidationException("Incorrect parameter \"size\"");
-        }
     }
 
     private void checkUserExist(Long userId) {

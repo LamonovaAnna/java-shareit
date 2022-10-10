@@ -37,9 +37,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                     @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
-                                                     @Positive @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> getAllItemsByOwner(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
         log.info("Get items by ownerId={}, from={}, size={}", userId, from, size);
         return itemClient.getAllItemsByOwner(userId, from, size);
     }
@@ -59,9 +60,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> findItemsByNameOrDescription(@RequestParam(value = "text", required = false) String text,
-                                                               @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
-                                                               @Positive @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> findItemsByNameOrDescription(
+            @RequestParam(value = "text", required = false) String text,
+            @PositiveOrZero @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
         log.info("Get items containing text={}, from={}, size={}", text, from, size);
         return itemClient.findItemsByNameOrDescription(text, from, size);
     }

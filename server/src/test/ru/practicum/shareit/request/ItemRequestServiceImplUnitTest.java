@@ -3,19 +3,14 @@ package ru.practicum.shareit.request;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.RequestNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
@@ -27,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,19 +69,7 @@ public class ItemRequestServiceImplUnitTest {
     }
 
     @Test
-    void test3_createItemRequestWithIncorrectRequestDescription() {
-        Mockito
-                .when(userRepository.findById(2L))
-                .thenReturn(Optional.of(requester));
-
-        request.setDescription("");
-        assertThrows(ValidationException.class, () -> itemRequestService.createItemRequest(
-                ItemRequestMapper.toItemRequestDto(request), 2L), "Incorrect exception");
-        Mockito.verify(itemRequestRepository, Mockito.never()).save(Mockito.any(ItemRequest.class));
-    }
-
-    @Test
-    void test4_getAllRequestsByRequester() {
+    void test3_getAllRequestsByRequester() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(requester));
@@ -103,7 +85,7 @@ public class ItemRequestServiceImplUnitTest {
     }
 
     @Test
-    void test5_getAllRequestsByRequesterWhenEmpty() {
+    void test4_getAllRequestsByRequesterWhenEmpty() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(requester));
@@ -119,7 +101,7 @@ public class ItemRequestServiceImplUnitTest {
     }
 
     @Test
-    void test6_getAllRequestsWithPagination() {
+    void test5_getAllRequestsWithPagination() {
         PageRequest pageRequest = PageRequest.of(0 / 10, 10, Sort.by("created").descending());
         Mockito
                 .when(userRepository.findById(1L))
@@ -137,7 +119,7 @@ public class ItemRequestServiceImplUnitTest {
     }
 
     @Test
-    void test7_getRequestById() {
+    void test6_getRequestById() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(requester));
@@ -151,28 +133,8 @@ public class ItemRequestServiceImplUnitTest {
         Mockito.verify(itemRequestRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
 
-    @MethodSource("test8MethodSource")
-    @ParameterizedTest
-    void test8_getAllRequestsWithIncorrectPagination(Integer from, Integer size) {
-        Mockito
-                .when(userRepository.findById(1L))
-                .thenReturn(Optional.of(requester));
-
-        assertThrows(ValidationException.class, () -> itemRequestService.getAllRequestsWithPagination(1L,
-                from, size), "Incorrect exception");
-        Mockito.verify(itemRequestRepository, Mockito.never())
-                .findAllByRequesterIdNot(1L, Pageable.unpaged());
-    }
-
-    private static Stream<Arguments> test8MethodSource() {
-        return Stream.of(
-                Arguments.of(-1, 10),
-                Arguments.of(0, -10)
-        );
-    }
-
     @Test
-    void test9_getRequestByIncorrectId() {
+    void test7_getRequestByIncorrectId() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(requester));

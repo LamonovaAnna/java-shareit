@@ -3,16 +3,12 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exception.IncorrectStatusException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
@@ -21,7 +17,6 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -315,34 +310,6 @@ public class BookingServiceImplIntTest {
         assertThrows(IncorrectStatusException.class, () -> bookingService.findBookingsByOwner(
                 owner.getId(), "APPROVED", 0, 10), "Incorrect exception");
     }
-
-    @MethodSource("test15MethodSource")
-    @ParameterizedTest
-    void test15_findBookingsByOwnerIncorrectPagination(Integer from, Integer size, String text) {
-        User owner = userRepository.save(makeUser(null, "test", "test@mail.ru"));
-        User booker = userRepository.save(makeUser(null, "test", "test@yandex.ru"));
-        Item item = itemRepository.save(makeItem(null, "Bicycle", "Very fast bicycle",
-                owner.getId(), true, null));
-        bookingRepository.save(makeBooking(booker, item, LocalDateTime.now().minusDays(5),
-                LocalDateTime.now().minusDays(1)));
-        bookingRepository.save(makeBooking(booker, item, LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(5)));
-
-        final ValidationException exception = Assertions.assertThrows(ValidationException.class,
-                () -> bookingService.findBookingsByOwner(owner.getId(), "ALL", from, size));
-        assertEquals(String.format("Incorrect parameter \"%s\"", text), exception.getMessage(),
-                "Incorrect message");
-        assertThrows(ValidationException.class, () -> bookingService.findBookingsByOwner(
-                owner.getId(), "ALL", from, size), "Incorrect exception");
-    }
-
-    private static Stream<Arguments> test15MethodSource() {
-        return Stream.of(
-                Arguments.of(-1, 10, "from"),
-                Arguments.of(0, -10, "size")
-        );
-    }
-
 
     private static Item makeItem(Long id, String name, String description, Long ownerId, Boolean isAvailable,
                                  ItemRequest request) {

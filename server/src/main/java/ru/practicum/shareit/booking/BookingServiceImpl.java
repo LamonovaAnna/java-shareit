@@ -45,7 +45,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findBookingsByBooker(long bookerId, String state, Integer from, Integer size) {
         checkUserExist(bookerId);
-        checkPaginationParametersAreCorrect(from, size);
         PageRequest pageable = PageRequest.of(from / size, size, Sort.by("startBooking").descending());
 
         switch (state) {
@@ -77,7 +76,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> findBookingsByOwner(long ownerId, String state, Integer from, Integer size) {
         checkUserExist(ownerId);
-        checkPaginationParametersAreCorrect(from, size);
         PageRequest pageable = PageRequest.of(from / size, size, Sort.by("startBooking").descending());
 
         switch (state) {
@@ -118,34 +116,10 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    private boolean isDateValid(BookingShortDto bookingDto) {
-        if (bookingDto.getEnd() != null && bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
-                bookingDto.getEnd().equals(bookingDto.getStart())) {
-            log.info("Incorrect end time {}", bookingDto.getEnd());
-            return false;
-        }
-        if (bookingDto.getStart() != null && bookingDto.getStart().isBefore(LocalDateTime.now())) {
-            log.info("Incorrect start time {}", bookingDto.getStart());
-            return false;
-        }
-        return true;
-    }
-
     private void checkIsOwner(Booking booking, long ownerId) {
         if (booking.getItem().getOwnerId() != ownerId) {
             log.info("Incorrect user id {}", ownerId);
             throw new IncorrectUserIdException();
-        }
-    }
-
-    private void checkPaginationParametersAreCorrect(Integer from, Integer size) {
-        if (from != null && from < 0) {
-            log.info("Parameter \"from\" have to be above or equals zero");
-            throw new ValidationException("Incorrect parameter \"from\"");
-        }
-        if (size != null && size <= 0) {
-            log.info("Parameter \"size\" have to be above zero");
-            throw new ValidationException("Incorrect parameter \"size\"");
         }
     }
 
@@ -166,8 +140,6 @@ public class BookingServiceImpl implements BookingService {
         } else if (!itemRepository.findById(bookingDto.getItemId()).get().getIsAvailable()) {
             log.info("Item with id {} doesn't available", bookingDto.getItemId());
             throw new ItemNotAvailableException();
-        } else if (!isDateValid(bookingDto)) {
-            throw new ValidationException("Incorrect start or end time");
         }
     }
 }

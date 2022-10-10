@@ -3,21 +3,16 @@ package ru.practicum.shareit.user;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,40 +40,8 @@ public class UserServiceImplUnitTest {
         Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
     }
 
-    @MethodSource("test2MethodSource")
-    @ParameterizedTest
-    void test2_createUserWithIncorrectEmail(User user) {
-        assertThrows(ValidationException.class, () -> userService.createUser(UserMapper.toUserDto(user)),
-                "Incorrect exception");
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
-    }
-
-    private static Stream<Arguments> test2MethodSource() {
-        return Stream.of(
-                Arguments.of(makeUser(1L, "test", "useryandex.ru")),
-                Arguments.of(makeUser(1L, "test", "")),
-                Arguments.of(makeUser(1L, "test", null))
-        );
-    }
-
-    @MethodSource("test3MethodSource")
-    @ParameterizedTest
-    void test3_createUserWithIncorrectName(User user) {
-        assertThrows(ValidationException.class, () -> userService.createUser(UserMapper.toUserDto(user)),
-                "Incorrect exception");
-        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
-    }
-
-    private static Stream<Arguments> test3MethodSource() {
-        return Stream.of(
-                Arguments.of(makeUser(1L, "", "user@yandex.ru")),
-                Arguments.of(makeUser(1L, null, "user@yandex.ru"))
-        );
-    }
-
-
     @Test
-    void test4_getUserByCorrectId() {
+    void test2_getUserByCorrectId() {
         Mockito
                 .when(userRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(firstUser));
@@ -90,7 +53,7 @@ public class UserServiceImplUnitTest {
     }
 
     @Test
-    void test5_getUserByIncorrectId() {
+    void test3_getUserByIncorrectId() {
         Mockito
                 .when(userRepository.findById(100L))
                 .thenReturn(Optional.empty());
@@ -102,7 +65,7 @@ public class UserServiceImplUnitTest {
     }
 
     @Test
-    void test6_getAllUsers() {
+    void test4_getAllUsers() {
         Mockito
                 .when(userRepository.findAll())
                 .thenReturn(List.of(firstUser, secondUser));
@@ -115,7 +78,7 @@ public class UserServiceImplUnitTest {
     }
 
     @Test
-    void test7_deleteUser() {
+    void test5_deleteUser() {
         Mockito
                 .doNothing()
                 .when(userRepository)

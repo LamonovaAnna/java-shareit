@@ -6,7 +6,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -24,7 +23,6 @@ public class ItemRequest {
     @Column(name = "request_id")
     private Long id;
 
-    @Size(max = 500)
     @Column(nullable = false)
     private String description;
 

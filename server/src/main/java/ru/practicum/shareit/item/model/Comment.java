@@ -6,7 +6,6 @@ import lombok.ToString;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +19,6 @@ public class Comment {
     @Column(name = "comment_id")
     private Long id;
 
-    @Size(max = 1500)
     @Column(nullable = false)
     private String text;
 

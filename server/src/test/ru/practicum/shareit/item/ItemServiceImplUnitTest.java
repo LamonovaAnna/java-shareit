@@ -3,20 +3,15 @@ package ru.practicum.shareit.item;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.IncorrectUserIdException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -29,7 +24,6 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,31 +72,8 @@ public class ItemServiceImplUnitTest {
         Mockito.verify(itemRepository, Mockito.never()).save(Mockito.any(Item.class));
     }
 
-    @MethodSource("test3MethodSource")
-    @ParameterizedTest
-    void test3_createItemIncorrectParameters(Item item) {
-        assertThrows(ValidationException.class, () -> itemService.createItem(ItemMapper.toItemDto(item), 1L),
-                "Incorrect exception");
-        Mockito.verify(itemRepository, Mockito.never()).save(Mockito.any(Item.class));
-    }
-
-    private static Stream<Arguments> test3MethodSource() {
-        return Stream.of(
-                Arguments.of(makeItem(null, "", "Very fast bicycle", null,
-                        true, null)),
-                Arguments.of(makeItem(null, null, "Very fast bicycle", null,
-                        true, null)),
-                Arguments.of(makeItem(null, "Bicycle", "", null,
-                        true, null)),
-                Arguments.of(makeItem(null, "Bicycle", null, null,
-                        true, null)),
-                Arguments.of(makeItem(null, "Bicycle", "Very fast bicycle", null,
-                        null, null))
-        );
-    }
-
     @Test
-    void test4_updateItem() {
+    void test3_updateItem() {
         Mockito
                 .when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));
@@ -123,7 +94,7 @@ public class ItemServiceImplUnitTest {
     }
 
     @Test
-    void test5_updateItemWhenIsNotOwner() {
+    void test4_updateItemWhenIsNotOwner() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(user2));
@@ -155,27 +126,8 @@ public class ItemServiceImplUnitTest {
 
     }
 
-    @MethodSource("test6MethodSource")
-    @ParameterizedTest
-    void test6_getAllItemsByOwnerWithIncorrectPagination(Integer from, Integer size) {
-        Mockito
-                .when(userRepository.findById(1L))
-                .thenReturn(Optional.of(user));
-
-        assertThrows(ValidationException.class, () -> itemService.getAllItemsByOwner(1L,
-                from, size), "Incorrect exception");
-        Mockito.verify(itemRepository, Mockito.never()).findAllByOwnerId(1L, Pageable.unpaged());
-    }
-
-    private static Stream<Arguments> test6MethodSource() {
-        return Stream.of(
-                Arguments.of(-1, 10),
-                Arguments.of(0, -10)
-        );
-    }
-
     @Test
-    void test7_findItemById() {
+    void test6_findItemById() {
         Mockito
                 .when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));
@@ -192,7 +144,7 @@ public class ItemServiceImplUnitTest {
 
 
     @Test
-    void test8_findItemByIncorrectItemId() {
+    void test7_findItemByIncorrectItemId() {
         Mockito
                 .when(userRepository.findById(1L))
                 .thenReturn(Optional.of(user));

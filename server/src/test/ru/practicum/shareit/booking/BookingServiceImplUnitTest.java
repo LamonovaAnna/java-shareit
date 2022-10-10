@@ -68,43 +68,8 @@ public class BookingServiceImplUnitTest {
         Mockito.verify(bookingRepository, Mockito.times(1)).save(Mockito.any(Booking.class));
     }
 
-
     @Test
-    void test2_createBookingStartIsBeforeNow() {
-        Mockito
-                .when(userRepository.findById(2L))
-                .thenReturn(Optional.of(booker));
-
-        Mockito
-                .when(itemRepository.findById(1L))
-                .thenReturn(Optional.of(item));
-
-        booking.setStartBooking(LocalDateTime.now().minusDays(1));
-
-        assertThrows(ValidationException.class, () -> bookingService.createBooking(
-                BookingMapper.toBookingShortDto(booking), 2L), "Incorrect exception");
-        Mockito.verify(bookingRepository, Mockito.never()).save(Mockito.any(Booking.class));
-    }
-
-    @Test
-    void test3_createBookingEndIsBeforeNow() {
-        Mockito
-                .when(userRepository.findById(2L))
-                .thenReturn(Optional.of(booker));
-
-        Mockito
-                .when(itemRepository.findById(1L))
-                .thenReturn(Optional.of(item));
-
-        booking.setEndBooking(LocalDateTime.now().minusDays(1));
-
-        assertThrows(ValidationException.class, () -> bookingService.createBooking(
-                BookingMapper.toBookingShortDto(booking), 2L), "Incorrect exception");
-        Mockito.verify(bookingRepository, Mockito.never()).save(Mockito.any(Booking.class));
-    }
-
-    @Test
-    void test4_createBookingIncorrectItemId() {
+    void test2_createBookingIncorrectItemId() {
         Mockito
                 .when(userRepository.findById(2L))
                 .thenReturn(Optional.of(booker));
@@ -115,14 +80,14 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void test5_createBookingBookerNotExist() {
+    void test3_createBookingBookerNotExist() {
         assertThrows(UserNotFoundException.class, () -> bookingService.createBooking(
                 BookingMapper.toBookingShortDto(booking), 2L), "Incorrect exception");
         Mockito.verify(bookingRepository, Mockito.never()).save(Mockito.any(Booking.class));
     }
 
     @Test
-    void test6_createBookingIncorrectBookerId() {
+    void test4_createBookingIncorrectBookerId() {
         Mockito
                 .when(userRepository.findById(1L))
                 .thenReturn(Optional.of(owner));
@@ -137,7 +102,7 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void test6_findBookingById() {
+    void test5_findBookingById() {
         Mockito
                 .when(bookingRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(savedBooking));
@@ -149,13 +114,13 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void test7_findBookingByIncorrectId() {
+    void test6_findBookingByIncorrectId() {
         assertThrows(BookingNotFoundException.class, () -> bookingService.findBookingById(100L, 2L),
                 "Incorrect exception");
     }
 
     @Test
-    void test8_findBookingByIncorrectUserId() {
+    void test7_findBookingByIncorrectUserId() {
         Mockito
                 .when(bookingRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(savedBooking));
@@ -164,9 +129,9 @@ public class BookingServiceImplUnitTest {
                 "Incorrect exception");
     }
 
-    @MethodSource("test9MethodSource")
+    @MethodSource("test8MethodSource")
     @ParameterizedTest
-    void test9_approveOrRejectBooking(Boolean isApproved, BookingStatus status) {
+    void test8_approveOrRejectBooking(Boolean isApproved, BookingStatus status) {
         Mockito
                 .when(userRepository.findById(1L))
                 .thenReturn(Optional.of(booker));
@@ -186,7 +151,7 @@ public class BookingServiceImplUnitTest {
         Mockito.verify(bookingRepository, Mockito.times(1)).save(Mockito.any(Booking.class));
     }
 
-    private static Stream<Arguments> test9MethodSource() {
+    private static Stream<Arguments> test8MethodSource() {
         return Stream.of(
                 Arguments.of(true, BookingStatus.APPROVED),
                 Arguments.of(false, BookingStatus.REJECTED)
@@ -194,7 +159,7 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void test10_approveOrRejectBookingWhenStatusIsNotWaiting() {
+    void test9_approveOrRejectBookingWhenStatusIsNotWaiting() {
         savedBooking.setStatus(BookingStatus.APPROVED);
 
         Mockito
@@ -211,7 +176,7 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void tes11_createBookingStartWhenItemNotAvailable() {
+    void tes10_createBookingStartWhenItemNotAvailable() {
         item.setIsAvailable(false);
 
         Mockito
@@ -229,7 +194,7 @@ public class BookingServiceImplUnitTest {
     }
 
     @Test
-    void test12_approveOrRejectBookingIncorrectOwnerId() {
+    void test11_approveOrRejectBookingIncorrectOwnerId() {
         Mockito
                 .when(bookingRepository.findById(Mockito.anyLong()))
                 .thenReturn(Optional.of(savedBooking));
