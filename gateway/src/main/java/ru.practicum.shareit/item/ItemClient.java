@@ -70,11 +70,11 @@ public class ItemClient extends BaseClient {
 
     private void checkItemValid(ItemDto item) {
         if (item.getName() == null || item.getName().isBlank()) {
-            log.info("Field \"name\" doesn't filled");
+            log.info("Field \"item name\" doesn't filled");
             throw new ValidationException("Incorrect item name");
         }
         if (item.getDescription() == null || item.getDescription().isBlank()) {
-            log.info("Field \"description\" doesn't filled");
+            log.info("Field \"item description\" doesn't filled");
             throw new ValidationException("Incorrect item description");
         }
         if (item.getIsAvailable() == null) {
